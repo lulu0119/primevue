@@ -362,12 +362,26 @@ export default {
                 this.repeat(event, null, -1);
             }
         },
-        onUserInput() {
+        onUserInput(event) {
             if (this.isSpecialChar) {
                 this.$refs.input.$el.value = this.lastValue;
+                this.isSpecialChar = false;
+
+                return;
             }
 
-            this.isSpecialChar = false;
+            // Handle mobile input
+            if (event.inputType === 'insertText' && event.data) {
+                const char = event.data;
+                const isDecimalSign = this.isDecimalSign(char);
+                const isMinusSign = this.isMinusSign(char);
+
+                this.$refs.input.$el.value = this.$refs.input.$el.value.slice(0, -1);
+
+                if ((Number(char) >= 0 && Number(char) <= 9) || isMinusSign || isDecimalSign) {
+                    this.insert(event, char, { isDecimalSign, isMinusSign });
+                }
+            }
         },
         onInputKeyDown(event) {
             if (this.readonly) {
@@ -388,9 +402,8 @@ export default {
             let selectionRange = selectionEnd - selectionStart;
             let inputValue = event.target.value;
             let newValueStr = null;
-            const code = event.code || event.key;
 
-            switch (code) {
+            switch (event.code) {
                 case 'ArrowUp':
                     this.spin(event, 1);
                     event.preventDefault();

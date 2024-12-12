@@ -12,7 +12,9 @@ export default {
     inheritAttrs: false,
     methods: {
         onInput(event) {
-            this.writeValue(event.target.value, event);
+            if (this.$parent.$options.name !== 'InputNumber') {
+                this.writeValue(event.target.value, event);
+            }
         }
     },
     computed: {
